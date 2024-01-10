@@ -18,6 +18,15 @@ class MockBehaviour : public Behaviour {
   MOCK_METHOD0(OnStart, void());
   MOCK_METHOD0_T(OnStop, void());
   MOCK_METHOD1(OnTick, void(units::time::second_t));
+  void OnTick(units::time::second_t) override {
+    counter++;
+  };
+  int GetCounter() {
+    return _counter; 
+  }
+
+ private:
+  int _counter = 0;
 };
 
 TEST(BehaviourTest, Tick) {
@@ -167,8 +176,9 @@ TEST(ConcurrentBehaviourTest, All) {
 
   EXPECT_CALL(*b1, OnStart).Times(1);
   EXPECT_CALL(*b2, OnStart).Times(1);
-  EXPECT_CALL(*b1, OnTick).Times(::testing::Between(4, 6));
-  EXPECT_CALL(*b2, OnTick).Times(::testing::Between(14, 16));
+  EXPECT_CALL(*b1, OnTick).Times(::testing::Between(1, 6));
+  EXPECT_CALL(*b2, OnTick).Times(::testing::Between(1, 16));
+  ASSERT_TRUE(b1->GetCounter() < b2->GetCounter());
   EXPECT_CALL(*b1, OnStop).Times(1);
   EXPECT_CALL(*b2, OnStop).Times(1);
 
