@@ -18,8 +18,8 @@ class MockBehaviour : public Behaviour {
   MOCK_METHOD0(OnStart, void());
   MOCK_METHOD0_T(OnStop, void());
   MOCK_METHOD1(OnTick, void(units::time::second_t));
-  void OnTick(units::time::second_t) override { counter++; };
-  int GetCounter() { return _counter; };
+  void OnTick(units::time::second_t) override { counter++; }
+  int GetCounter() { return _counter; }
 
  private:
   int _counter = 0;
