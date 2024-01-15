@@ -48,4 +48,12 @@ class Robot : public frc::TimedRobot {
   frc::SendableChooser<std::string> m_path_chooser;
 
   wom::SwerveDrive* _swerveDrive;
+
+  wom::Limelight *limelight;
+
+  frc::Pose3d currentPosition;
+  int inviewapriltag;
+  int getx;
+  int gety;
+  int getv;
 };

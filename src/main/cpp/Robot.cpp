@@ -11,6 +11,7 @@
 #include <units/angle.h>
 #include <units/time.h>
 #include <units/voltage.h>
+#include <vision/Limelight.h>
 
 #include <frc/kinematics/DifferentialDriveKinematics.h>
 #include <frc/controller/RamseteController.h>
@@ -36,6 +37,15 @@ void Robot::RobotInit() {
 
   robotmap.swerveBase.gyro->Reset();
 
+  limelight = new wom::Limelight("imblindedbythelights");
+  limelight->SetPipeline(wom::LimelightPipeline::kPipeline0);
+  limelight->SetCamMode(wom::LimelightCamMode::kVisionProcessor);
+  limelight->SetLEDMode(wom::LimelightLEDMode::kForceOn);
+  currentPosition = limelight->GetPose();
+  
+  
+  
+
   _swerveDrive =
       new wom::SwerveDrive(robotmap.swerveBase.config, frc::Pose2d());
   wom::BehaviourScheduler::GetInstance()->Register(_swerveDrive);
@@ -51,11 +61,17 @@ void Robot::RobotInit() {
 void Robot::RobotPeriodic() {
   auto dt = wom::now() - lastPeriodic;
   lastPeriodic = wom::now();
+  getv = limelight->GetTargetingData(wom::LimelightTargetingData::kTv);
+  getx = limelight->GetTargetingData(wom::LimelightTargetingData::kTx);
+  gety = limelight->GetTargetingData(wom::LimelightTargetingData::kTy);
 
   loop.Poll();
   wom::BehaviourScheduler::GetInstance()->Tick();
 
   _swerveDrive->OnUpdate(dt);
+
+  currentPosition = limelight->GetPose();
+  inviewapriltag = limelight->GetAprilTagData(wom::LimelightAprilTagData::kTid)[0];
 }
 
 void Robot::AutonomousInit() {
@@ -65,8 +81,11 @@ void Robot::AutonomousInit() {
   sched->InterruptAll();
   // _swerveDrive->OnStart();
 }
+
 void Robot::AutonomousPeriodic() {
   // m_driveSim->OnUpdate();
+
+  _swerveDrive->SetPose(frc::Pose2d(units::meter_t(getx) + currentPosition.X(), currentPosition.Y(), 1_rad));
 }
 
 void Robot::TeleopInit() {
